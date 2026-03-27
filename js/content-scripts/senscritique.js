@@ -1,4 +1,4 @@
-let overseerrContainer, senscritiqueId, currentSenscritiqueUrl, tmdbId, mediaType, mediaInfo;
+let seerrContainer, senscritiqueId, currentSenscritiqueUrl, tmdbId, mediaType, mediaInfo;
 
 containerOptions.anchorElement = 'div[data-testid="product-infos"]';
 containerOptions.textClass = 'text-sm';

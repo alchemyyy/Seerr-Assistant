@@ -1,75 +1,93 @@
-let serverAPIKeyInput = document.getElementById('serverAPIKey');
-let serverIpInput = document.getElementById('serverIp');
-let serverPathInput = document.getElementById('serverPath');
-let serverPortInput = document.getElementById('serverPort');
-let useHTTPSInput = document.getElementById('useHTTPS');
+let seerrUrlInput = document.getElementById('seerrUrl');
+let usernameInput = document.getElementById('username');
+let passwordInput = document.getElementById('password');
 let spinnerDiv = document.getElementById('spinnerDiv');
 let loginStatusOKDiv = document.getElementById('loginStatusOK');
 let loginStatusKODiv = document.getElementById('loginStatusKO');
-let currentURL = document.getElementById('currentURL');
-
-let saveButton = document.getElementById('saveButton');
-let alertDanger = document.getElementById('alertDanger');
+let loginErrorMessage = document.getElementById('loginErrorMessage');
+let loginButton = document.getElementById('loginButton');
 
 
 function enableSpinner() {
     spinnerDiv.innerHTML = `
         <div class="spinner-border text-primary m-3"></div>
-        <div class="text-white">Checking status...</div>
+        <div class="text-white">Logging in...</div>
     `;
 }
 
 function disableSpinner() {
-    spinnerDiv.innerHTML = ``;
+    spinnerDiv.innerHTML = '';
 }
 
-function setDangerMessage(message, timeout=3000) {
-    if (!message) {
-        alertDanger.hidden = true;
-        return;
-    }
-    alertDanger.innerText = message;
-    alertDanger.hidden = false;
-    if (timeout > 0) {
-        setTimeout(function() {
-            alertDanger.hidden = true;
-            alertDanger.innerText = '';
-        }, timeout);
-    }
+function showError(message) {
+    loginStatusOKDiv.hidden = true;
+    loginStatusKODiv.hidden = false;
+    loginErrorMessage.textContent = message || 'Unable to connect to Seerr';
 }
 
-function getProtocol() {
-    return useHTTPSInput.checked ? 'https' : 'http';
+function showSuccess() {
+    loginStatusOKDiv.hidden = false;
+    loginStatusKODiv.hidden = true;
 }
 
-function updateLoggedInStatus(callback) {
-    saveButton.disabled = true;
+function hideStatus() {
     loginStatusOKDiv.hidden = true;
     loginStatusKODiv.hidden = true;
-    enableSpinner();
-    isLoggedIn(function(loggedIn) {
-        disableSpinner();
-        loginStatusOKDiv.hidden = !loggedIn;
-        loginStatusKODiv.hidden = loggedIn;
-        saveButton.disabled = false;
-        if (callback) callback();
-    });
 }
 
-function requestPermission(callback) {
-    chrome.permissions.contains({
-        origins: [`${origin}/`]
-    }, function(result) {
+function validUrl(str) {
+    try {
+        const url = new URL(str);
+        return url.protocol === 'http:' || url.protocol === 'https:';
+    } catch {
+        return false;
+    }
+}
+
+function validateForm() {
+    let valid = true;
+
+    if (validUrl(seerrUrlInput.value)) {
+        seerrUrlInput.classList.remove('is-invalid');
+    } else {
+        seerrUrlInput.classList.add('is-invalid');
+        valid = false;
+    }
+
+    if (usernameInput.value.trim().length > 0) {
+        usernameInput.classList.remove('is-invalid');
+    } else {
+        usernameInput.classList.add('is-invalid');
+        valid = false;
+    }
+
+    if (passwordInput.value.length > 0) {
+        passwordInput.classList.remove('is-invalid');
+    } else {
+        passwordInput.classList.add('is-invalid');
+        valid = false;
+    }
+
+    loginButton.disabled = !valid;
+    return valid;
+}
+
+function requestPermission(url, callback) {
+    let permOrigin;
+    try {
+        const parsed = new URL(url);
+        permOrigin = `${parsed.protocol}//${parsed.host}/`;
+    } catch {
+        if (callback) callback(false);
+        return;
+    }
+    chrome.permissions.contains({ origins: [permOrigin] }, function(result) {
         if (!result) {
-            chrome.permissions.request({
-                origins: [`${origin}/`]
-            }, function(granted) {
-                if (callback) {
-                    if (!granted) {
-                        alert('Not granting this permission will make the extension unusable.');
-                    }
-                    callback(granted);
+            chrome.permissions.request({ origins: [permOrigin] }, function(granted) {
+                if (!granted) {
+                    alert('Not granting this permission will make the extension unusable.');
                 }
+                if (callback) callback(granted);
             });
         } else if (callback) {
             callback(true);
@@ -77,72 +95,50 @@ function requestPermission(callback) {
     });
 }
 
-function validHost(str) {
-    let pattern = new RegExp('^((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
-        '((\\d{1,3}\\.){3}\\d{1,3}))$'); // OR ip (v4) address
-    return !!pattern.test(str);
+function checkExistingSession() {
+    loginButton.disabled = true;
+    hideStatus();
+    enableSpinner();
+    isLoggedIn(function(loggedIn) {
+        disableSpinner();
+        if (loggedIn) {
+            showSuccess();
+        }
+        loginButton.disabled = false;
+    });
 }
 
-function validateForm() {
-    // Host
-    const value = serverIpInput.value;
-    const isLocalhost = (value === 'localhost');
-    const isServerIPValid = validHost(value) || isLocalhost;
-    if (isServerIPValid) {
-        serverIpInput.classList.remove('is-invalid');
-    } else {
-        serverIpInput.classList.add('is-invalid');
-        saveButton.disabled = true;
-    }
-    // Path
-    const isValidPath = /^((\/[.\w-]+)*\/{0,1}|\/)$/.test(serverPathInput.value);
-    if (isValidPath) {
-        serverPathInput.classList.remove('is-invalid');
-    } else {
-        serverPathInput.classList.add('is-invalid');
-        saveButton.disabled = true;
-    }
-    // API key
-    const isValidAPIKey = /^[\w=]{60,70}$/.test(serverAPIKeyInput.value);
-    if (isValidAPIKey) {
-        serverAPIKeyInput.classList.remove('is-invalid');
-    } else {
-        serverAPIKeyInput.classList.add('is-invalid');
-        saveButton.disabled = true;
-    }
-}
+loginButton.onclick = function(ev) {
+    ev.preventDefault();
+    if (!validateForm()) return;
 
-function requireSaving() {
-    updateCurrentURL();
-    if (xhr !== null) {
-        xhr.abort();
-    }
-    if (serverIpInput.value === serverIp &&
-        parseInt(serverPortInput.value) === parseInt(serverPort) &&
-        useHTTPSInput.checked === (serverProtocol === 'https') &&
-        serverAPIKeyInput.value === serverAPIKey &&
-        serverPathInput.value === serverPath) {
-        updateLoggedInStatus();
-    } else {
-        saveButton.disabled = false;
-        loginStatusOKDiv.hidden = true;
-        loginStatusKODiv.hidden = true;
-    }
-    validateForm();
-}
+    loginButton.disabled = true;
+    hideStatus();
+    enableSpinner();
 
-function updateCurrentURL() {
-    portString = `:${serverPortInput.value}`;
-    if ((useHTTPSInput.checked && serverPortInput.value === '443') || (!useHTTPSInput.checked && serverPortInput.value === '80')) {
-        portString = '';
-    }
-    currentURL.innerHTML = `${useHTTPSInput.checked ? 'https' : 'http'}://${serverIpInput.value}${portString}${serverPathInput.value}`;
-}
-
-saveButton.onclick = function(ev) {
-    setOrigin(serverAPIKeyInput.value, serverIpInput.value, serverPortInput.value, getProtocol(), serverPathInput.value, function() {
-        requestPermission(function(granted) {
-            updateLoggedInStatus();
+    const url = seerrUrlInput.value.replace(/\/+$/, '');
+    setSeerrUrl(url, function() {
+        requestPermission(url, function(granted) {
+            if (!granted) {
+                disableSpinner();
+                showError('Permission denied for this URL');
+                loginButton.disabled = false;
+                return;
+            }
+            chrome.runtime.sendMessage({
+                contentScriptQuery: 'login',
+                username: usernameInput.value.trim(),
+                password: passwordInput.value
+            }, function(response) {
+                disableSpinner();
+                loginButton.disabled = false;
+                if (response && response.success) {
+                    showSuccess();
+                    passwordInput.value = '';
+                } else {
+                    showError((response && response.error) || 'Login failed');
+                }
+            });
         });
     });
 };
@@ -151,20 +147,19 @@ $(document).ready(function(){
     $('[data-toggle="tooltip"]').tooltip();
 });
 
+seerrUrlInput.oninput = function() { hideStatus(); validateForm(); };
+usernameInput.oninput = function() { hideStatus(); validateForm(); };
+passwordInput.oninput = function() { hideStatus(); validateForm(); };
+
 pullStoredData(function() {
-    serverAPIKeyInput.value = serverAPIKey;
-    serverIpInput.value = serverIp;
-    serverPortInput.value = serverPort;
-    serverPathInput.value = serverPath;
-    useHTTPSInput.checked = serverProtocol === 'https';
+    seerrUrlInput.value = seerrUrl || '';
 
-    updateCurrentURL();
+    chrome.storage.sync.get(['seerrUsername'], function(data) {
+        usernameInput.value = data.seerrUsername || '';
+        validateForm();
 
-    serverAPIKeyInput.oninput = requireSaving;
-    serverIpInput.oninput = requireSaving;
-    serverPortInput.oninput = requireSaving;
-    serverPathInput.oninput = requireSaving;
-    useHTTPSInput.oninput = requireSaving;
-
-    updateLoggedInStatus();
+        if (seerrUrl && userId) {
+            checkExistingSession();
+        }
+    });
 });

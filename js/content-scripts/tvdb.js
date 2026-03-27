@@ -1,4 +1,4 @@
-let overseerrContainer, imdbId, tmdbId, mediaType, mediaInfo;
+let seerrContainer, imdbId, tmdbId, mediaType, mediaInfo;
 
 containerOptions.anchorElement = '#translations';
 containerOptions.textClass = 'text-sm';
@@ -56,24 +56,7 @@ if(tmdbMatch.length > 0 || imdbMatch.length > 1) {
         } else if (imdbMatch.length > 1) {
             imdbId = imdbMatch[1];
             console.log(`IMDb id: ${imdbId}`);
-
-            chrome.runtime.sendMessage({contentScriptQuery: 'getOverseerrVersion'}, json => {
-                if (!json.version || json.version.localeCompare("1.29.0", undefined, { numeric: true, sensitivity: 'base' }) < 0) {
-                    chrome.runtime.sendMessage({contentScriptQuery: 'checkJellyseerr'}, isJellyseerr => {
-                        if (isJellyseerr) {
-                            searchMedia();
-                        } else {
-                            removeSpinner();
-                            insertStatusButton('Please update to Overseerr 1.29.0+', 0);
-                            return;
-                        }
-                    });
-                } else {
-                    searchMedia();
-                }
-            });
+            searchMedia();
         }
     });
 }
-
-

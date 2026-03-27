@@ -1,4 +1,4 @@
-let overseerrContainer, tmdbId, mediaType, mediaInfo;
+let seerrContainer, tmdbId, mediaType, mediaInfo;
 
 containerOptions.anchorElement = `div.review.body-text`;
 containerOptions.containerClass = 'oa-py-5';

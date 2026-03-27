@@ -1,4 +1,4 @@
-let overseerrContainer, allocineId, tmdbId, mediaType, mediaInfo;
+let seerrContainer, tmdbId, mediaType, mediaInfo;
 
 containerOptions.shadowRoot = document.querySelector("media-hero").shadowRoot;
 containerOptions.anchorElement = '.metadata';

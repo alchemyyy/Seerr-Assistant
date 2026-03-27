@@ -14,11 +14,12 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     if (request.contentScriptQuery === 'queryMedia') {
         console.log(`Querying ${request.mediaType} '${request.tmdbId}'`);
         pullStoredData(function() {
-            const options = {headers: {'X-Api-Key': serverAPIKey}};
-            fetch(`${origin}/api/v1/${request.mediaType}/${encodeURIComponent(request.tmdbId)}`, options)
+            fetch(`${origin}/api/v1/${request.mediaType}/${encodeURIComponent(request.tmdbId)}`, {
+                credentials: 'include'
+            })
                 .then(response => response.json())
                 .then(json => sendResponse(json))
-                .catch(error => console.error(error))
+                .catch(error => console.error(error));
         });
         return true;
     }
@@ -26,12 +27,12 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     else if (request.contentScriptQuery === 'requestMedia') {
         console.log(`Requesting media '${request.tmdbId}' of type '${request.mediaType}'`);
         pullStoredData(function() {
-            const options = {
+            fetch(`${origin}/api/v1/request`, {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json', 'X-Api-Key': serverAPIKey},
-                body: JSON.stringify({mediaType: request.mediaType, mediaId: request.tmdbId, seasons: request.seasons})
-            };
-            fetch(`${origin}/api/v1/request`, options)
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ mediaType: request.mediaType, mediaId: request.tmdbId, seasons: request.seasons })
+            })
                 .then(response => response.json())
                 .then(json => sendResponse(json))
                 .catch(error => console.error(error));
@@ -42,8 +43,9 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     else if (request.contentScriptQuery === 'search') {
         console.log(`Searching movie '${request.title}'`);
         pullStoredData(function() {
-            const options = {headers: {'X-Api-Key': serverAPIKey}};
-            fetch(`${origin}/api/v1/search?query=${encodeURIComponentSafe(request.title)}`, options)
+            fetch(`${origin}/api/v1/search?query=${encodeURIComponentSafe(request.title)}`, {
+                credentials: 'include'
+            })
                 .then(response => response.json())
                 .then(json => sendResponse(json))
                 .catch(error => console.error(error));
@@ -51,38 +53,36 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         return true;
     }
 
-    else if (request.contentScriptQuery === 'plexQueryMedia') {
-        let mediaKey = encodeURIComponentSafe(request.mediaKey);
-        let plexToken = encodeURIComponentSafe(request.plexToken);
-        console.log(`Requesting Plex media '${mediaKey}'`);
-        const options = {headers: {'Accept': 'application/json'}};
-        fetch(`https://metadata.provider.plex.tv/library/metadata/${mediaKey}?X-Plex-Token=${plexToken}`, options)
-            .then(response => response.json())
-            .then(json => sendResponse(json))
-            .catch(error => console.error(error));
-        return true;
-    }
-
-    else if (request.contentScriptQuery === 'getOverseerrVersion') {
-        console.log(`Getting Overseerr version`);
+    else if (request.contentScriptQuery === 'login') {
+        console.log('Logging in');
         pullStoredData(function() {
-            const options = {headers: {'X-Api-Key': serverAPIKey}};
-            fetch(`${origin}/api/v1/status`, options)
-                .then(response => response.json())
-                .then(json => sendResponse(json))
-                .catch(error => console.error(error));
-        });
-        return true;
-    }
+            function onSuccess(user) {
+                userId = user.id;
+                chrome.storage.sync.set({ userId: userId });
+                sendResponse({ success: true, user: user });
+            }
 
-    else if (request.contentScriptQuery === 'checkJellyseerr') {
-        console.log(`Checking if instance is Jellyseerr`);
-        pullStoredData(function() {
-            const options = {headers: {'X-Api-Key': serverAPIKey, 'Accept': 'application/json'}};
-            fetch(`${origin}/api/v1/auth/me`, options)
-                .then(response => response.json())
-                .then(json => sendResponse(Object.keys(json).filter((key) => /jellyfin/.test(key)).length > 0))
-                .catch(error => console.error(error));
+            // Try local auth first (email + password)
+            fetch(`${origin}/api/v1/auth/local`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ email: request.username, password: request.password })
+            })
+                .then(response => {
+                    if (response.ok) return response.json().then(onSuccess);
+                    // Local auth failed, try Jellyfin auth (username + password)
+                    return fetch(`${origin}/api/v1/auth/jellyfin`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({ username: request.username, password: request.password })
+                    }).then(jfResponse => {
+                        if (jfResponse.ok) return jfResponse.json().then(onSuccess);
+                        return jfResponse.json().then(err => sendResponse({ success: false, error: err.message || 'Login failed' }));
+                    });
+                })
+                .catch(() => sendResponse({ success: false, error: 'Server unreachable' }));
         });
         return true;
     }

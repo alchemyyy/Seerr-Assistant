@@ -1,4 +1,4 @@
-let overseerrContainer, imdbId, tmdbId, mediaType, mediaInfo;
+let seerrContainer, imdbId, tmdbId, mediaType, mediaInfo;
 
 containerOptions.anchorElement = `div:has(> .ipc-split-button__btn)`;
 containerOptions.textClass = 'oa-text-sm';
@@ -46,23 +46,6 @@ if (matches !== null && matches.length > 1) {
             insertNotLoggedInButton();
             return;
         }
-        chrome.runtime.sendMessage({contentScriptQuery: 'getOverseerrVersion'}, json => {
-            if (!json.version || json.version.localeCompare("1.29.0", undefined, { numeric: true, sensitivity: 'base' }) < 0) {
-                chrome.runtime.sendMessage({contentScriptQuery: 'checkJellyseerr'}, isJellyseerr => {
-                    if (isJellyseerr) {
-                        searchMedia();
-                    } else {
-                        removeSpinner();
-                        insertStatusButton('Please update to Overseerr 1.29.0+', 0);
-                        return;
-                    }
-                });
-            } else {
-                searchMedia();
-            }
-        });
+        searchMedia();
     });
 }
-
-
-

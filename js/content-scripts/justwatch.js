@@ -1,4 +1,4 @@
-let overseerrContainer, tmdbId, mediaType, mediaInfo;
+let seerrContainer, tmdbId, mediaType, mediaInfo;
 
 containerOptions.anchorElement = `div.title-sidebar > div > button.basic-button:first`;
 containerOptions.textClass = 'oa-text-sm';
@@ -10,7 +10,7 @@ let currentHref = document.location.href;
 
 
 function processPage() {
-    if (overseerrContainer) overseerrContainer.remove();
+    if (seerrContainer) seerrContainer.remove();
 
     if (waiting) {
         return;

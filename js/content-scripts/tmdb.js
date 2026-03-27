@@ -1,4 +1,4 @@
-let overseerrContainer, tmdbId, mediaType, mediaInfo;
+let seerrContainer, tmdbId, mediaType, mediaInfo;
 
 containerOptions.anchorElement = 'ul.auto.actions';
 containerOptions.containerClass = 'oa-py-2';
@@ -28,4 +28,3 @@ if (matches !== null && matches.length > 1) {
         });
     });
 }
-

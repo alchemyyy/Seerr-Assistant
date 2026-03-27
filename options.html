@@ -6,63 +6,48 @@
   <link rel="stylesheet" type="text/css" href="css/all.min.css">
   <link rel="stylesheet" type="text/css" href="css/overseerr.min.css">
   <link rel="stylesheet" type="text/css" href="css/options.css">
-  <title>Overseerr Options</title>
+  <title>Seerr Assistant</title>
 </head>
 <body>
   <div class="flex row justify-center m-5">
-    <img class="overseerr-icon mb-2 mr-4" src="images/icon.png" alt="Overseerr icon"/>
+    <img class="seerr-icon mb-2 mr-4" src="images/icon.png" alt="Seerr icon"/>
     <div>
-      <div class="text-white h1 pt-2">Overseerr Assistant</div>
+      <div class="text-white h1 pt-2">Seerr Assistant</div>
       <div class="text-white h4 pl-1">Options</div>
     </div>
   </div>
   <div class="d-flex justify-center">
     <form>
       <div class="form-group">
-        <label for="serverAPIKey">Overseerr API key</label>
-        <input type="text" class="form-control" id="serverAPIKey">
-        <div id="serverAPIKeyFeedback" class="invalid-feedback">
-          Please provide a valid API key
-        </div>
-      </div>
-      <div class="form-group">
         <div class="flex m-0 row">
-          <label for="serverIp">Overseerr server's host</label>
-          <i class="fa text-primary fa-info-circle ml-2" data-toggle="tooltip" data-placement="right" data-original-title="The domain name, IP address or hostname of the Overseerr server"></i>
+          <label for="seerrUrl">Seerr URL</label>
+          <i class="fa text-primary fa-info-circle ml-2" data-toggle="tooltip" data-placement="right" data-original-title="The full URL to your Seerr instance, e.g. https://seerr.example.com or http://192.168.1.100:5055"></i>
         </div>
-        <input type="text" class="form-control" id="serverIp">
-        <div id="serverIpFeedback" class="invalid-feedback">
-          Please provide a valid host
+        <input type="url" class="form-control" id="seerrUrl" placeholder="https://seerr.example.com">
+        <div id="seerrUrlFeedback" class="invalid-feedback">
+          Please provide a valid URL
         </div>
       </div>
       <div class="form-group">
-        <label for="serverPort">Overseerr server's port</label>
-        <input type="number" class="form-control" id="serverPort">
+        <label for="username">Username</label>
+        <input type="text" class="form-control" id="username" placeholder="Username">
+        <div id="usernameFeedback" class="invalid-feedback">
+          Please provide a username
+        </div>
       </div>
       <div class="form-group">
-        <div class="flex m-0 row">
-          <label for="serverPath">Overseerr server's path</label>
-          <i class="fa text-primary fa-info-circle ml-2" data-toggle="tooltip" data-placement="right" data-original-title="The path of the Overseerr server"></i>
+        <label for="password">Password</label>
+        <input type="password" class="form-control" id="password" placeholder="Password">
+        <div id="passwordFeedback" class="invalid-feedback">
+          Please provide a password
         </div>
-        <input type="text" class="form-control" id="serverPath">
-        <div id="serverPathFeedback" class="invalid-feedback">
-          Please provide a valid path
-        </div>
-      </div>
-      <div class="form-check flex items-center">
-        <input type="checkbox" class="form-check-input" id="useHTTPS">
-        <label class="form-check-label ml-3 mt-1" for="useHTTPS">Use HTTPS</label>
-      </div>
-      <div class="form-group text-white justify-content-center">
-        <label class="h4">Your Overseer URL:</label>
-        <label class="h6 text-center" id="currentURL"></label>
       </div>
       <div class="d-flex justify-content-center">
         <div id="loginStatusOK" class="alert alert-success mt-2" hidden>
           <i class="fa fa-check small mr-3"></i>You are logged in
         </div>
         <div id="loginStatusKO" class="alert alert-danger mt-2" hidden>
-          <i class="fa fa-times small mr-3"></i>Unable to connect to Overseerr
+          <i class="fa fa-times small mr-3"></i><span id="loginErrorMessage">Unable to connect to Seerr</span>
         </div>
       </div>
     </form>
@@ -71,7 +56,7 @@
   </div>
   <div class="flex row justify-center">
     <div class="m-2">
-      <button id="saveButton" class="btn btn-primary m-1">Save</button>
+      <button id="loginButton" class="btn btn-primary m-1">Login</button>
     </div>
   </div>
 </body>
@@ -79,7 +64,6 @@
 <script type="text/javascript" src="js/lib/jquery-3.5.1.min.js"></script>
 <script type="text/javascript" src="js/lib/popper.min.js"></script>
 <script type="text/javascript" src="js/lib/bootstrap.min.js"></script>
-<script type="text/javascript" src="js/overseerr-api.js"></script>
 <script type="text/javascript" src="js/storage.js"></script>
 <script src="options.js"></script>
 </html>

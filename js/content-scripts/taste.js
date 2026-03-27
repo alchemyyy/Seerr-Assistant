@@ -1,4 +1,4 @@
-let overseerrContainer, allocineId, tmdbId, mediaType, mediaInfo;
+let seerrContainer, tmdbId, mediaType, mediaInfo;
 
 containerOptions.anchorElement = 'div.styles_container__2u8xM';
 containerOptions.textClass = 'text-sm';
