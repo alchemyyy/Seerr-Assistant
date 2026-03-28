@@ -90,11 +90,11 @@ function fillContainer(mediaInfo) {
                     .filter((season) => season.status === 5)
                     .map((season) => season.seasonNumber);
             }
-            insertStatusButton(mediaStatus[status], null, availableSeasons)
+            insertStatusButton(mediaStatus[status], null, availableSeasons, true)
             insertMediaButton(mediaUrl, isPlex);
             break;
         case 5: // Available
-            insertStatusButton(mediaStatus[status]);
+            insertStatusButton(mediaStatus[status], null, null, true);
             insertMediaButton(mediaUrl, isPlex);
             break;
     }
@@ -166,12 +166,15 @@ function insertRequestedButton() {
     `);
 }
 
-function insertStatusButton(statusText, requestCount, availableSeasons) {
+function insertStatusButton(statusText, requestCount, availableSeasons, isAvailable) {
     const hasBadge = requestCount > 0 || (availableSeasons && availableSeasons.length > 0);
     const href = tmdbId ? `${origin}/${mediaType}/${tmdbId}` : origin;
+    const gradientClass = isAvailable
+        ? 'seerr-status-available'
+        : 'oa-bg-gradient-to-br oa-from-indigo-600 oa-to-purple-600 hover:oa-from-indigo-500 hover:oa-to-purple-500';
     seerrContainer.append(`
         <a class="oa-flex oa-h-full oa-group oa-items-center oa-px-4 oa-py-2 ${containerOptions.textClass} oa-leading-6 oa-font-medium oa-rounded${hasBadge ? '-l' : ''}-md seerr-text-white
-            focus:oa-outline-none oa-transition oa-ease-in-out oa-duration-150 oa-bg-gradient-to-br oa-from-indigo-600 oa-to-purple-600 hover:oa-from-indigo-500 hover:oa-to-purple-500" href="${href}" target="_blank">
+            focus:oa-outline-none oa-transition oa-ease-in-out oa-duration-150 ${gradientClass}" href="${href}" target="_blank">
           ${statusText}
         </a>
     `);

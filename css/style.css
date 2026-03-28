@@ -1,3 +1,11 @@
+.seerr-status-available {
+    background: linear-gradient(to bottom right, #059669, #047857);
+}
+
+.seerr-status-available:hover {
+    background: linear-gradient(to bottom right, #10b981, #059669);
+}
+
 #seerr-assistant-container {
     font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial,
         sans-serif, Apple Color Emoji, Segoe UI Emoji;

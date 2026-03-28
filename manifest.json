@@ -2,21 +2,30 @@
   "name": "Seerr Assistant",
   "version": "2.1.0",
   "description": "Browser extension for Seerr that embeds buttons into IMDb and TMDB web pages to easily request movies and tv shows.",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "{46e700b0-8dfc-4ca4-b74c-b40a881c4504}",
+      "strict_min_version": "142.0",
+      "data_collection_permissions": {
+        "required": ["authenticationInfo"]
+      }
+    }
+  },
   "permissions": ["storage"],
   "optional_host_permissions": ["http://*/", "https://*/"],
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
-      "16": "images/icon.png",
-      "32": "images/icon.png",
-      "48": "images/icon.png",
+      "16": "images/icon-16.png",
+      "32": "images/icon-32.png",
+      "48": "images/icon-48.png",
       "128": "images/icon.png"
     }
   },
   "icons": {
-    "16": "images/icon.png",
-    "32": "images/icon.png",
-    "48": "images/icon.png",
+    "16": "images/icon-16.png",
+    "32": "images/icon-32.png",
+    "48": "images/icon-48.png",
     "128": "images/icon.png"
   },
   "content_scripts": [{
@@ -62,7 +71,8 @@
   }],
   "options_page": "options.html",
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background.js",
+    "scripts": ["js/storage.js", "background.js"]
   },
   "web_accessible_resources": [{
     "resources": ["images/icon.png", "css/style.css"],

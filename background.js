@@ -1,4 +1,4 @@
-importScripts('js/storage.js');
+if (typeof importScripts !== 'undefined') importScripts('js/storage.js');
 
 
 function encodeURIComponentSafe(value) {
@@ -27,15 +27,23 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     else if (request.contentScriptQuery === 'requestMedia') {
         console.log(`Requesting media '${request.tmdbId}' of type '${request.mediaType}'`);
         pullStoredData(function() {
-            fetch(`${origin}/api/v1/request`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify({ mediaType: request.mediaType, mediaId: request.tmdbId, seasons: request.seasons })
-            })
-                .then(response => response.json())
-                .then(json => sendResponse(json))
-                .catch(error => console.error(error));
+            const storageKey = request.mediaType === 'movie' ? 'movieOverrides' : 'tvOverrides';
+            chrome.storage.sync.get([storageKey], function(data) {
+                const overrides = data[storageKey] || {};
+                const body = { mediaType: request.mediaType, mediaId: request.tmdbId, seasons: request.seasons };
+                if (overrides.profileId) body.profileId = overrides.profileId;
+                if (overrides.rootFolder) body.rootFolder = overrides.rootFolder;
+                if (overrides.serverId !== undefined && overrides.serverId !== null) body.serverId = overrides.serverId;
+                fetch(`${origin}/api/v1/request`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(body)
+                })
+                    .then(response => response.json())
+                    .then(json => sendResponse(json))
+                    .catch(error => console.error(error));
+            });
         });
         return true;
     }
@@ -83,6 +91,55 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
                     });
                 })
                 .catch(() => sendResponse({ success: false, error: 'Server unreachable' }));
+        });
+        return true;
+    }
+
+    else if (request.contentScriptQuery === 'fetchServices') {
+        console.log(`Fetching ${request.serviceType} services`);
+        pullStoredData(function() {
+            fetch(`${origin}/api/v1/service/${request.serviceType}`, {
+                credentials: 'include'
+            })
+                .then(response => response.json())
+                .then(servers => {
+                    if (!Array.isArray(servers) || servers.length === 0) {
+                        sendResponse({ servers: [], profiles: [], rootFolders: [] });
+                        return;
+                    }
+                    const serverId = servers[0].id;
+                    fetch(`${origin}/api/v1/service/${request.serviceType}/${serverId}`, {
+                        credentials: 'include'
+                    })
+                        .then(response => response.json())
+                        .then(details => {
+                            sendResponse({
+                                servers: servers,
+                                profiles: details.profiles || [],
+                                rootFolders: details.rootFolders || []
+                            });
+                        })
+                        .catch(error => { console.error(error); sendResponse({ servers: [], profiles: [], rootFolders: [] }); });
+                })
+                .catch(error => { console.error(error); sendResponse({ servers: [], profiles: [], rootFolders: [] }); });
+        });
+        return true;
+    }
+
+    else if (request.contentScriptQuery === 'fetchServiceDetails') {
+        console.log(`Fetching ${request.serviceType} server ${request.serverId} details`);
+        pullStoredData(function() {
+            fetch(`${origin}/api/v1/service/${request.serviceType}/${request.serverId}`, {
+                credentials: 'include'
+            })
+                .then(response => response.json())
+                .then(details => {
+                    sendResponse({
+                        profiles: details.profiles || [],
+                        rootFolders: details.rootFolders || []
+                    });
+                })
+                .catch(error => { console.error(error); sendResponse({ profiles: [], rootFolders: [] }); });
         });
         return true;
     }

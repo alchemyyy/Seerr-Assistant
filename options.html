@@ -59,6 +59,64 @@
       <button id="loginButton" class="btn btn-primary m-1">Login</button>
     </div>
   </div>
+
+  <div id="overridesSection" class="d-flex justify-center mt-4" hidden>
+    <div style="width: 400px;">
+      <hr class="border-secondary">
+      <div class="text-white h5 mb-3">Request Overrides</div>
+
+      <div class="text-white h6 mb-2"><i class="fa fa-film mr-2"></i>Movies (Radarr)</div>
+      <div class="form-group">
+        <label for="movieServer">Server</label>
+        <select class="form-control" id="movieServer">
+          <option value="">Default</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="movieQualityProfile">Quality Profile</label>
+        <select class="form-control" id="movieQualityProfile">
+          <option value="">Default</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="movieRootFolder">Root Folder</label>
+        <select class="form-control" id="movieRootFolder">
+          <option value="">Default</option>
+        </select>
+      </div>
+
+      <div class="text-white h6 mb-2 mt-4"><i class="fa fa-tv mr-2"></i>TV Shows (Sonarr)</div>
+      <div class="form-group">
+        <label for="tvServer">Server</label>
+        <select class="form-control" id="tvServer">
+          <option value="">Default</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="tvQualityProfile">Quality Profile</label>
+        <select class="form-control" id="tvQualityProfile">
+          <option value="">Default</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="tvRootFolder">Root Folder</label>
+        <select class="form-control" id="tvRootFolder">
+          <option value="">Default</option>
+        </select>
+      </div>
+
+      <div class="d-flex justify-content-center">
+        <div id="overridesStatusOK" class="alert alert-success mt-2" hidden>
+          <i class="fa fa-check small mr-3"></i>Overrides saved
+        </div>
+      </div>
+      <div class="flex row justify-center">
+        <div class="m-2">
+          <button id="saveOverridesButton" class="btn btn-primary m-1">Save Overrides</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
 
 <script type="text/javascript" src="js/lib/jquery-3.5.1.min.js"></script>

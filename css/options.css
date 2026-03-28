@@ -15,3 +15,19 @@ form {
     margin-left: 0;
     margin-right: 0;
 }
+
+select.form-control {
+    background-color: #374151;
+    color: #fff;
+    border-color: #4b5563;
+}
+
+select.form-control:focus {
+    background-color: #374151;
+    color: #fff;
+    border-color: #6366f1;
+}
+
+hr.border-secondary {
+    border-color: #4b5563;
+}
