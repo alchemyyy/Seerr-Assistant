@@ -7,10 +7,10 @@ Firefox Add-On Page: <https://addons.mozilla.org/en-US/firefox/addon/seerr-assis
 Seerr Assistant is a browser extension for [Seerr](https://github.com/seerr-team/seerr)
 
 Features:
-- One-click Overseerr requests directly from media websites
-- One-click access to available media on Plex
-- Monitor requests statu
-s- Support for both movies and TV shows
+- One-click Seerr requests directly from media websites
+- Monitor requests status
+- Support for both movies and TV shows
+- Support for Jellyfin login credentials through Seerr
 
 Supported media websites:
 - [IMDb](https://www.imdb.com/)
