@@ -1,6 +1,7 @@
 # Seerr Assistant
 
 Chrome Web Store Page: <https://chromewebstore.google.com/detail/seerr-assistant/idjoapfabmkojbhifbkjcdbmnohijdib>
+
 Firefox Add-On Page: <https://addons.mozilla.org/en-US/firefox/addon/seerr-assistant/>
 
 Seerr Assistant is a browser extension for [Seerr](https://github.com/seerr-team/seerr)
